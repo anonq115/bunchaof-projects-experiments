@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Custom Input Component Example</title>
+    <style>
+        #output { white-space: pre-wrap; }
+        .remaining-time { color: green; }
+    </style>
+</head>
+<body>
+    <input id="textInput" type="text" placeholder="Type here..." onkeyup="handleKeyUp(event)">
+    <div id="output"></div>
+    <ul id="timerList"></ul>
+    <script>
+        const MAX_ALARMS = 10, timerList = document.getElementById('timerList');
+        let alarms = 0;
+
+        const parseTime = (word) => {
+            const match = word.match(/^(\d+)([hms]?)(\d+)?$/i);
+            if (!match) return {h: NaN, m: NaN, s: NaN};
+            const [_, val1, unit, val2] = match, v1 = parseInt(val1), v2 = parseInt(val2 || 0);
+            return unit.toLowerCase() === 'h' ? {h: v1, m: v2, s: 0} : 
+                   unit === 'm' ? {h: 0, m: v1, s: v2} : 
+                   {h: 0, m: 0, s: v1};
+        };
+
+        const addTimer = (h, m, s, name) => {
+            const end = Date.now() + (h * 3600000 + m * 60000 + s * 1000);
+            createTimer(name, end);
+        };
+
+        const createTimer = (name, end) => {
+            const li = document.createElement('li'), span = document.createElement('span');
+            li.innerHTML = `${name}: `; span.className = 'remaining-time'; li.appendChild(span);
+            const localTimeSpan = document.createElement('span'); li.appendChild(localTimeSpan);
+            timerList.appendChild(li);
+
+            const update = () => {
+                const remaining = Math.max(end - Date.now(), 0), h = Math.floor(remaining / 3600000),
+                      m = Math.floor((remaining % 3600000) / 60000), s = Math.floor((remaining % 60000) / 1000);
+                span.textContent = `${h}h ${m}m ${s}s`;
+                localTimeSpan.textContent = ` (${new Date(end).toLocaleTimeString()})`;
+                if (remaining > 0) requestAnimationFrame(update); 
+                else { span.textContent = "Time's up!"; alarms--; setTimeout(() => timerList.removeChild(li), 2000); }
+            };
+            update();
+        };
+
+        const handleKeyUp = (e) => {
+            if (e.key !== 'Enter' || !e.target.value.trim()) return;
+            if (alarms >= MAX_ALARMS) return alert('Max alarms reached!'), e.target.value = '';
+            const input = e.target.value.split(/\s+/), time = parseTime(input[0]);
+            if (!isNaN(time.h)) return addTimer(time.h, time.m, time.s, input.slice(1).join(' ')), alarms++, e.target.value = '';
+            document.getElementById('output').innerHTML = input.join(' '); e.target.value = '';
+        };
+    </script>
+</body>
+</html>
+/*https://chat.openai.com/share/4eec385e-3dbc-4fcd-8f04-8b4b0a202a11 */

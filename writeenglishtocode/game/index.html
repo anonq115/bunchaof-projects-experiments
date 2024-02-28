@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pixel Canvas</title>
+    <style>
+        /* Add overflow: hidden to body and html to disable scrolling */
+        body, html {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .canvas {
+            display: grid;
+            grid-template-columns: repeat(50, 20px);
+            grid-template-rows: repeat(50, 20px);
+        }
+
+        .pixel {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+
+        .food {
+            background-color: green;
+        }
+
+        /* Define a custom cursor style */
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%; /* Makes the cursor circular */
+            background-color: rgba(0, 0, 255, 0.5); /* Customize the cursor color with transparency */
+            position: absolute;
+            pointer-events: none; /* Allows interactions with elements beneath */
+            transform: translate(-50%, -50%); /* Center the cursor at the mouse pointer */
+        }
+
+        /* Hide the default cursor */
+        body {
+            cursor: none;
+        }
+    </style>
+</head>
+<body tabindex="0">
+    <h1>Pixel Canvas</h1>
+    <p>Food: <span id="foodCount">0</span></p>
+    <div class="canvas" id="canvas"></div>
+
+    <script>
+        // Focus the body element to ensure keyboard events are captured immediately
+        document.body.focus();
+
+        const canvas = document.getElementById('canvas');
+        const pixels = [];
+        let foodCount = 0; // Initialize food count to zero
+        const foodCountElement = document.getElementById('foodCount');
+        let autoPlaceMode = false; // Initialize auto place mode to false
+
+        // Create the initial canvas grid
+        for (let i = 0; i < 2500; i++) {
+            const pixel = document.createElement('div');
+            pixel.className = 'pixel';
+            pixel.addEventListener('click', () => {
+                // Check if the player has enough food to place a pixel
+                if (foodCount > 0) {
+                    pixel.style.backgroundColor = getRandomColor();
+                    foodCount--; // Decrement food count
+                    foodCountElement.textContent = foodCount;
+                }
+            });
+            pixels.push(pixel);
+            canvas.appendChild(pixel);
+
+            // Create food pixels randomly
+            if (Math.random() < 0.05) {
+                const foodPixel = document.createElement('div');
+                foodPixel.className = 'pixel food';
+                pixel.appendChild(foodPixel);
+            }
+        }
+
+        // Function to generate random colors
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // Toggle auto place mode with 'd' key
+        document.body.addEventListener('keydown', (event) => {
+            if ((event.key === 'd' || event.key === 'D') && foodCount > 0) {
+                autoPlaceMode = !autoPlaceMode;
+            }
+        });
+
+        // Function to handle mousemove event
+        canvas.addEventListener('mousemove', (event) => {
+            const x = Math.floor((event.clientX - canvas.getBoundingClientRect().left) / 20); // Calculate grid x coordinate
+            const y = Math.floor((event.clientY - canvas.getBoundingClientRect().top) / 20); // Calculate grid y coordinate
+            const currentPixel = pixels[x + y * 50];
+
+            if (currentPixel) {
+                // Collect food if present
+                if (currentPixel.querySelector('.food')) {
+                    currentPixel.removeChild(currentPixel.querySelector('.food'));
+                    foodCount++; // Increment food count when collecting food
+                    foodCountElement.textContent = foodCount;
+                }
+
+                // Auto place pixel if in autoPlaceMode and has enough food
+                if (autoPlaceMode && foodCount > 0 && currentPixel.style.backgroundColor === '') {
+                    currentPixel.style.backgroundColor = getRandomColor();
+                    foodCount--; // Decrement food count
+                    foodCountElement.textContent = foodCount;
+
+                    // If food count reaches zero, toggle off autoPlaceMode
+                    if (foodCount === 0) {
+                        autoPlaceMode = false;
+                    }
+                }
+            }
+        });
+
+        // Create a custom cursor element
+        const customCursor = document.createElement('div');
+        customCursor.className = 'custom-cursor';
+
+        // Append the custom cursor to the body
+        document.body.appendChild(customCursor);
+
+        // Update the custom cursor position based on mouse movement
+        document.body.addEventListener('mousemove', (event) => {
+            customCursor.style.left = `${event.clientX}px`;
+            customCursor.style.top = `${event.clientY}px`;
+        });
+    </script>
+</body>
+</html>

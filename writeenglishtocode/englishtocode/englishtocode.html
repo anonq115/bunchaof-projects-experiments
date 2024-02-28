@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  background-color: black;
+  color: lime;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#codeText {
+  position: relative;
+  display: inline;
+  color: white;
+  padding: 2px;
+}
+
+#codeText::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(90deg, #00ff5534, rgb(89, 43, 255),#6200ff 112%,
+        #3f00ebd5 100%,
+        #2720ff9f 30.66%,
+        #3328cc 90%);
+  background-size: 200% auto;
+  animation: gradient 3s ease infinite;
+  z-index: -1;
+  filter: blur(4px);
+  
+}
+/**a mehtod !sadasdasada 
+Aasd
+asd
+
+asd
+asd
+**/
+@keyframes gradient {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+</style>
+</head>
+<body>
+<div id="englishText"></div>
+<br>
+<div id="codeText"></div>
+
+<script>
+// Initial and final texts
+let englishText = "if the string paper is found, turn the text into red; else dont do anything.";
+let codeText = `(text.includes("paper")) {\n\ttextElement.style.color = "red";\n} else {\n\tconsole.log('the string');\n}`;
+
+// Function to type the texts
+function typeText() {
+  let englishElement = document.getElementById("englishText");
+  let codeElement = document.getElementById("codeText");
+  let newEnglishText = "";
+  let newCodeText = "";
+  let ass = "asdasd";
+  console.log(ass);
+  
+
+  for (let i = 0; i < englishText.length; i++) {
+    setTimeout(function() {
+      newEnglishText += englishText[i];
+      englishElement.innerHTML = newEnglishText;
+    }, i * 100);  // Delay each character by 100ms
+  }
+
+  for (let i = 0; i < codeText.length; i++) {
+    setTimeout(function() {
+      newCodeText += codeText[i];
+      console.log(1);
+      codeElement.innerHTML = newCodeText;
+    }, i * 100);  // Delay each character by 100ms
+  }
+}
+/*------------------------------------------------*/
+console.log('asdsred');
+
+
+// Call the function
+typeText();
+</script>
+</body>
+</html>

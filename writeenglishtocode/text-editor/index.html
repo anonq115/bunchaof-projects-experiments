@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* CSS rules for syntax highlighting */
+    .keyword {
+      color: purple;
+    }
+
+    /* Style for the "output" */
+    #highlighted-code {
+      border: 1px solid #ccc;
+      padding: 10px;
+      user-select: none; /* Prevent text selection in the "output" */
+    }
+
+    /* Style for the transparent textarea */
+    #code-editor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+      border: none;
+      resize: none;
+      font-family: monospace;
+      font-size: 16px;
+      color: transparent; /* Hide the user input text */
+      user-select: none; /* Prevent text selection in the textarea */
+    }
+
+    /* Hide selected text in the transparent textarea */
+    #code-editor::selection {
+      background-color: transparent;
+    }
+  </style>
+  <script>
+    function highlightCode() {
+      const codeEditor = document.getElementById("code-editor");
+      const code = codeEditor.value;
+      const highlightedCode = code.replace(/\bif\b/g, '<span class="keyword">if</span>');
+      document.getElementById("highlighted-code").innerHTML = highlightedCode;
+    }
+  </script>
+</head>
+<body>
+  <div style="position: relative;">
+    <textarea id="code-editor" rows="10" cols="50" oninput="highlightCode()"></textarea>
+    <pre id="highlighted-code"></pre>
+  </div>
+</body>
+</html>

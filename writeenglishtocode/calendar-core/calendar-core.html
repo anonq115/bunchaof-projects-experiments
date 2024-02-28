@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .calendar-tooltip,.calendar-tooltip .calendar-tooltiptext{position:absolute}.calendar-tooltip{cursor:pointer}.calendar-tooltip .calendar-tooltiptext{visibility:hidden;width:500px;background:#555;color:#fff;text-align:center;border-radius:6px;padding:5px;z-index:1;top:calc(100%+5px);left:0;opacity:0;transition:opacity .3s}.calendar-tooltip.active .calendar-tooltiptext{visibility:visible;opacity:1}
+  </style>
+</head>
+<body>
+  <label for="calendar-dateInput">Enter details:</label>
+  <div class="calendar-tooltip">
+    <input type="text" id="calendar-dateInput" style="width:100%;">
+    <span class="calendar-tooltiptext" id="calendar-tooltip"></span>
+  </div>
+  <script>
+    (function() {
+      const calendarFormatDate = ([m, d, y]) => new Date(y.length===2?'20'+y:y, m-1, d).toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'});
+      const calendarDisplayTooltip = () => {
+        const input = document.getElementById('calendar-dateInput').value, tooltip = document.getElementById('calendar-tooltip');
+        const patterns = {
+          date:/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/,
+          time:/(\d{1,2}:\d{2}[apmAPM]{2})\s*(?:to\s*(\d{1,2}:\d{2}[apmAPM]{2}))?/,
+          address:/(\d+\s[a-zA-Z\s\d,]+)\s*;/,
+          name:/;([a-zA-Z\s]+);/,
+          notes:/;([^;]+)(?=\s*[\d]+[dhm]\s*)?/,
+          calendarReminders:/\s*([\d]+[dhm]\s*){1,5}\.*$/
+        };
+        let text = "", results = {};
+        for (const [k, p] of Object.entries(patterns)) {
+          const m = input.match(p);
+          if (m) {
+            results[k] = m[1];
+            if (k==='date') results[k] = calendarFormatDate(m.slice(1, 4));
+            if (k==='time') results[k] = `${m[1]} ${m[2] ? 'to ' + m[2] : ''}`;
+            if (k==='calendarReminders') results[k] = m[0].trim();
+          }
+        }
+        if (results.date) text += `Date: ${results.date}<br>`;
+        if (results.time) text += `Time: ${results.time}<br>`;
+        if (results.address) text += `Address: ${results.address}<br>`;
+        if (results.name) text += `Name: ${results.name}<br>`;
+        if (results.notes) text += `Notes: ${results.notes.replace(results.calendarReminders || '', '')}<br>`;
+        if (results.calendarReminders && text) text += `CalendarReminders: ${results.calendarReminders.replace(/\.*$/, '')}`;
+        tooltip.innerHTML = text || input;
+        tooltip.parentElement.classList.add('active');
+      };
+      document.getElementById('calendar-dateInput').addEventListener('input', calendarDisplayTooltip);
+    })();
+  </script>
+</body>
+</html>

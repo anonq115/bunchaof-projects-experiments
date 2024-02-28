@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* CSS for the arrows */
+        .arrow {
+            position: fixed;
+            display: none;
+            font-size: 30px;
+            user-select: none; /* Prevents the element from being highlightable */
+        }
+
+        .arrow.left {
+            left: 10px;
+        }
+
+        .arrow.right {
+            right: 10px;
+        }
+
+        /* CSS for the page numbers */
+        .page h1 {
+            user-select: none; /* Prevents the element from being highlightable by default */
+        }
+
+        .page h1:hover {
+            user-select: text; /* Allows text highlighting on hover */
+        }
+    </style>
+</head>
+<body>
+    <!-- Pages -->
+    <div id="page1" class="page" style="background-color: red;">
+        <h1>Page 1</h1>
+    </div>
+
+    <div id="page2" class="page" style="background-color: blue;">
+        <h1>Page 2</h1>
+    </div>
+
+    <div id="page3" class="page" style="background-color: blue;">
+        <h1>Page 3</h1>
+    </div>
+    <div id="page4" class="page" style="background-color: blue;">
+        <h1>Page 4</h1>
+    </div>
+    <div id="page5" class="page" style="background-color: blue;">
+        <h1>Page 5</h1>
+    </div>
+    <div id="page6" class="page" style="background-color: blue;">
+        <h1>Page 6</h1>
+    </div>
+    <!-- Arrows -->
+    <div id="leftArrow" class="arrow left">&larr;</div>
+    <div id="rightArrow" class="arrow right">&rarr;</div>
+
+    <script>
+        // Page navigation
+        let currentPage = 1;
+        let totalPages = document.getElementsByClassName('page').length;
+        let startX = null;
+        let direction = null;
+        let pageChangeTimeout = null;
+
+        function goToNextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                showPage(currentPage);
+                pageChangeTimeout = setTimeout(goToNextPage, 350);
+            }
+        }
+
+        function goToPreviousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+                pageChangeTimeout = setTimeout(goToPreviousPage, 350);
+            }
+        }
+
+        function showPage(pageNumber) {
+            const pages = document.getElementsByClassName('page');
+            for (let i = 0; i < pages.length; i++) {
+                pages[i].style.display = 'none';
+            }
+            document.getElementById('page' + pageNumber).style.display = 'block';
+        }
+
+        // Arrow visibility
+        function showArrow(arrowId) {
+            document.getElementById(arrowId).style.display = 'block';
+        }
+
+        function hideArrow(arrowId) {
+            document.getElementById(arrowId).style.display = 'none';
+        }
+
+        // Mouse movement
+        document.onmousemove = function (e) {
+            const x = e.clientX;
+            const arrowLeft = document.getElementById('leftArrow');
+            const arrowRight = document.getElementById('rightArrow');
+
+            if (startX === null) {
+                startX = x;
+            }
+
+            const distance = Math.abs(x - startX);
+
+            if(distance >= 2.5) {
+                if (x < startX) {
+                    direction = 'left';
+                } else if (x > startX) {
+                    direction = 'right';
+                }
+                startX = x;
+            }
+
+            if (direction === 'left') {
+                arrowLeft.style.left = x + 'px';
+                arrowRight.style.right = '10px';
+                showArrow('leftArrow');
+                hideArrow('rightArrow');
+            } else if (direction === 'right') {
+                arrowRight.style.right = window.innerWidth - x + 'px';
+                arrowLeft.style.left = '10px';
+                showArrow('rightArrow');
+                hideArrow('leftArrow');
+            }
+        };
+
+        // Mouse click
+        document.onmousedown = function () {
+            if (direction === 'left') {
+                goToPreviousPage();
+            } else if (direction === 'right') {
+                goToNextPage();
+            }
+        };
+
+        document.onmouseup = function () {
+            clearTimeout(pageChangeTimeout);
+        };
+
+        // Update total pages
+        function updateTotalPages() {
+            totalPages = document.getElementsByClassName('page').length;
+        }
+
+        // Initial page display
+        showPage(currentPage);
+        updateTotalPages();
+    </script>
+</body>
+</html>

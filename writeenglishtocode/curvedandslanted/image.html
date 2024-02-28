@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curved Monitor Effect</title>
+    <style>
+        body { margin: 0; color:white;}
+        canvas { display: block; }
+        .slider-container {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30%;
+            text-align: center;
+        }
+        .slider-label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .slider {
+            width: 100%;
+            
+            
+            
+        }
+        .image-container img {
+    width: 100%;
+    height: 100px;
+    transform-origin: center center;
+    transition: transform 0.5s;
+    transform: rotateX(0deg);
+    border: 1px solid #000; /* Border added for better visual reference */
+    image-rendering: pixelated;
+    will-change: transform;
+}
+        
+        
+    </style>
+</head>
+<body>
+
+<script type="module">
+    import { PerspectiveCamera, Scene, WebGLRenderer, PlaneBufferGeometry, TextureLoader, MeshBasicMaterial, Mesh, DoubleSide } from 'https://cdn.skypack.dev/three@0.132.2';
+
+    var scene = new Scene();
+    var camera = new PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    var renderer = new WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    var geometry = new PlaneBufferGeometry(5, 5, 10, 10);
+    var texture = new TextureLoader().load('https://i.imgur.com/QxCDseJ.jpg');
+    var material = new MeshBasicMaterial({ map: texture, side: DoubleSide, wireframe: false });
+    var plane = new Mesh(geometry, material);
+    scene.add(plane);
+
+    camera.position.z = 5;
+
+    document.body.insertAdjacentHTML('beforeend', `
+        <div class="slider-container">
+            <div class="slider-label">Curvature:</div>
+            <input type="range" id="curvature-slider" min="0" max="2" value="0" step="0.01" class="slider">
+            <div class="slider-label">Top Bend Start:</div>
+            <input type="range" id="top-bend-slider" min="-2.5" max="2.5" value="0" step="0.01" class="slider">
+            <div class="slider-label">Bottom Bend Start:</div>
+            <input type="range" id="bottom-bend-slider" min="-2.5" max="2.5" value="0" step="0.01" class="slider">
+            <div class="slider-label">Intensity:</div>
+            <input type="range" id="intensity-slider" min="0" max="10" value="1" step="0.01" class="slider">
+            <div class="slider-label">Bent Area Size:</div>
+            <input type="range" id="size-slider" min="0.1" max="5" value="1" step="0.01" class="slider">
+            <div class="slider-label">Image Width:</div>
+            <input type="range" id="width-slider" min="0.1" max="10" value="5" step="0.1" class="slider">
+            <div class="slider-label">Image Height:</div>
+            <input type="range" id="height-slider" min="0.1" max="10" value="5" step="0.1" class="slider">
+        </div>
+    `);
+    
+    var curvatureSlider = document.getElementById('curvature-slider');
+    var topBendSlider = document.getElementById('top-bend-slider');
+    var bottomBendSlider = document.getElementById('bottom-bend-slider');
+    var intensitySlider = document.getElementById('intensity-slider');
+    var sizeSlider = document.getElementById('size-slider');
+    var widthSlider = document.getElementById('width-slider');
+    var heightSlider = document.getElementById('height-slider');
+
+    curvatureSlider.addEventListener('input', updateCurvature);
+    topBendSlider.addEventListener('input', updateCurvature);
+    bottomBendSlider.addEventListener('input', updateCurvature);
+    intensitySlider.addEventListener('input', updateCurvature);
+    sizeSlider.addEventListener('input', updateCurvature);
+    widthSlider.addEventListener('input', updateSize);
+    heightSlider.addEventListener('input', updateSize);
+
+    function updateCurvature() {
+        var curvatureValue = parseFloat(curvatureSlider.value);
+        var topBendValue = parseFloat(topBendSlider.value);
+        var bottomBendValue = parseFloat(bottomBendSlider.value);
+        var intensityValue = parseFloat(intensitySlider.value);
+        var sizeValue = parseFloat(sizeSlider.value);
+        var positions = plane.geometry.attributes.position.array;
+        for (var i = 0; i < positions.length; i += 3) {
+            var y = positions[i + 1];
+            var bendStart = y < 0 ? bottomBendValue : topBendValue;
+            y -= bendStart;
+            y /= sizeValue;
+            positions[i + 2] = intensityValue * curvatureValue * (y*y - 2.5*2.5 / (sizeValue * sizeValue));
+        }
+        plane.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function updateSize() {
+        var widthValue = parseFloat(widthSlider.value);
+        var heightValue = parseFloat(heightSlider.value);
+        plane.scale.set(widthValue, heightValue, 1);
+    }
+
+    var animate = function () {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    };
+
+    animate();
+</script>
+
+</body>
+</html>

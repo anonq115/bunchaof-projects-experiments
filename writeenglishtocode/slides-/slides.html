@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Slideshow</title>
+<style>
+    body, html {margin: 0; padding: 0; overflow: hidden; font-family: Arial, sans-serif;}
+    #slides {width: 100%; height: 100vh; position: relative;}
+    .slide {width: 100%; height: 100%; position: absolute; display: none; padding: 20px; box-sizing: border-box;}
+    .shown {display: block;}
+</style>
+</head>
+<body>
+<div id="slides">
+    <div class="slide shown" style="background-color: #f0a;">
+        Slide 1 content here. Nothing is true. Everything is permitted.
+    </div>
+    <div class="slide" style="background-color: #a0f;">
+        Slide 2 content here. The mind must be free. Seek not to chain it.
+    </div>
+    <div class="slide" style="background-color: #0af;">
+        Slide 3 content here. In the void, find clarity. In chaos, find wisdom.
+    </div>
+    <div class="slide" style="background-color: #fa0;">
+        Slide 4 content here. Embrace the unknown. Fear not the abyss.
+    </div>
+    <div class="slide" style="background-color: #af0;">
+        Slide 5 content here. Shatter the chains that bind. Rise from the ashes.
+    </div>
+    <div class="slide" style="background-color: #0fa;">
+        Slide 6 content here. Seek the truth. Dare to question.
+    </div>
+    <div class="slide" style="background-color: #f00;">
+        Slide 7 content here. Ignorance is the greatest cage. Knowledge, the key.
+    </div>
+    <div class="slide" style="background-color: #0f0;">
+        Slide 8 content here. Each step taken, a new horizon revealed.
+    </div>
+    <div class="slide" style="background-color: #00f;">
+        Slide 9 content here. In endless pursuit, find endless freedom.
+    </div>
+</div>
+<script>
+    const slides = document.querySelectorAll('.slide');
+    let currentSlideIndex = 0, scrollCounter = 0;
+
+    const showSlide = (index) => {
+        slides[currentSlideIndex].classList.toggle('shown', false);
+        currentSlideIndex = index;
+        slides[currentSlideIndex].classList.toggle('shown', true);
+    };
+
+    const nextSlide = () => showSlide((currentSlideIndex + 1) % slides.length);
+    const prevSlide = () => showSlide((currentSlideIndex - 1 + slides.length) % slides.length);
+
+    window.addEventListener('wheel', (event) => {
+        scrollCounter = (scrollCounter + 1) % 2;  // Reset to 0 after reaching 2
+        if (scrollCounter === 0) {
+            event.deltaY > 0 ? nextSlide() : prevSlide();
+        }
+        event.preventDefault();
+    });
+
+    showSlide(currentSlideIndex);  // Show the initial slide
+</script>
+</body>
+</html>

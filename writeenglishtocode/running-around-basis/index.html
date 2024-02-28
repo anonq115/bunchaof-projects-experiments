@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Animated Blue Boxes</title>
+  <style>
+    body {
+      font-size: 24px;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    #container {
+      position: relative;
+      text-align: center;
+    }
+    .box {
+      position: absolute;
+      opacity: 0.5;
+      display: none;
+    }
+    #blue-box {
+      background-color: blue;
+    }
+    #box2 {
+      background-color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="container">
+    <span id="text">Hello World, how are you?</span>
+    <div id="blue-box" class="box"></div>
+    <div id="box2" class="box"></div>
+  </div>
+
+  <label for="speed">Blue Box Speed: </label>
+  <input type="range" id="speed" min="1" max="100" value="50">
+  <label for="speed2">Box2 Speed: </label>
+  <input type="range" id="speed2" min="1" max="100" value="50">
+
+  <script>
+    const textElement = document.getElementById('text');
+    const blueBox = document.getElementById('blue-box');
+    const box2 = document.getElementById('box2');
+    const container = document.getElementById('container');
+    const speedSlider = document.getElementById('speed');
+    const speedSlider2 = document.getElementById('speed2');
+    const maxSpeed = 5000;
+    let index = 0;
+    let wordIndex = 0;
+    let timer, timer2;
+    let hasCompletedFirstLoop = false;
+
+    function getLetterPosition(element, index) {
+      const range = document.createRange();
+      range.setStart(element.firstChild, index);
+      range.setEnd(element.firstChild, index + 1);
+      return range.getBoundingClientRect();
+    }
+
+    function getWordPosition(element, wordIndex) {
+      const words = element.textContent.split(' ');
+      const range = document.createRange();
+      let start = 0;
+      for (let i = 0; i < wordIndex; i++) {
+        start += words[i].length + 1;
+      }
+      range.setStart(element.firstChild, start);
+      range.setEnd(element.firstChild, start + words[wordIndex].length);
+      return range.getBoundingClientRect();
+    }
+
+    function animateBox() {
+      if (index < textElement.textContent.length) {
+        const rect = getLetterPosition(textElement, index);
+        blueBox.style.left = `${rect.left - container.getBoundingClientRect().left}px`;
+        blueBox.style.top = `${rect.top - container.getBoundingClientRect().top}px`;
+        blueBox.style.width = `${rect.width}px`;
+        blueBox.style.height = `${rect.height}px`;
+        blueBox.style.display = 'block';
+        index++;
+      } else {
+        index = 0;
+        hasCompletedFirstLoop = true;
+        startWordLoop();
+      }
+      const speed = Math.pow(maxSpeed, 1 - speedSlider.value / 100);
+      timer = setTimeout(animateBox, speed);
+    }
+
+    function startWordLoop() {
+      if (hasCompletedFirstLoop) {
+        const words = textElement.textContent.split(' ');
+        if (wordIndex < words.length) {
+          const rect = getWordPosition(textElement, wordIndex);
+          box2.style.left = `${rect.left - container.getBoundingClientRect().left}px`;
+          box2.style.top = `${rect.top - container.getBoundingClientRect().top}px`;
+          box2.style.width = `${rect.width}px`;
+          box2.style.height = `${rect.height}px`;
+          box2.style.display = 'block';
+          wordIndex++;
+        } else {
+          wordIndex = 0;
+        }
+        const speed = Math.pow(maxSpeed, 1 - speedSlider2.value / 100);
+        clearTimeout(timer2);
+        timer2 = setTimeout(startWordLoop, speed);
+      }
+    }
+
+    timer = setTimeout(animateBox, Math.pow(maxSpeed, 1 - speedSlider.value / 100));
+
+    speedSlider.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(animateBox, Math.pow(maxSpeed, 1 - speedSlider.value / 100));
+    });
+
+    speedSlider2.addEventListener('input', () => {
+      if (hasCompletedFirstLoop) {
+        clearTimeout(timer2);
+        timer2 = setTimeout(startWordLoop, Math.pow(maxSpeed, 1 - speedSlider2.value / 100));
+      }
+    });
+  </script>
+
+</body>
+</html>

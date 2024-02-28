@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super-Powered Query Finder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .highlighted {
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                #FFEB3B 10px,
+                #FFEB3B 20px
+            );
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Enter Your Knowledgebase</h2>
+    <textarea id="knowledgebase" placeholder="Enter your knowledgebase here..."></textarea>
+
+    <h2>Ask a Question Based on Your Knowledgebase</h2>
+    <textarea id="question" placeholder="Enter your question here..."></textarea>
+    <button onclick="askQuestion()">Ask</button>
+
+    <div class="output" id="output">Output will appear here...</div>
+
+    <script>
+        const STOP_WORDS = ["what", "is", "and", "the", "to", "of", "in", "that", "it", "for", "on", "with", "as", "by", "at", "an", "this", "be", "from", "or", "which", "are", "how"];
+
+        const QUANTUM_KEYWORDS = {
+            "rich": ["money"],
+            "money": ["rich"]
+        };
+
+        function splitKnowledgebase(knowledgebase) {
+            return knowledgebase.split(/;|\./).map(block => block.trim()).filter(block => block.length > 0);
+        }
+
+        function hasMultipleMatches(queryWords, block) {
+            return queryWords.filter(word => block.includes(word) && !STOP_WORDS.includes(word)).length > 1;
+        }
+
+        function stripPunctuation(input) {
+            return input.replace(/[.,?!;()"'-]/g, " ").replace(/\s+/g, " ");
+        }
+
+        function getCorrelatedKeywords(keyword) {
+            return QUANTUM_KEYWORDS[keyword] || [];
+        }
+
+        function findMatchingBlocks(query, blocks) {
+            query = stripPunctuation(query);
+            const queryWords = query.toLowerCase().split(/\s+/).filter(word => word.trim().length > 0);
+
+            if (!queryWords.length) {
+                return [];
+            }
+
+            const isCommonQuery = queryWords.every(word => STOP_WORDS.includes(word));
+            let matchesFound = false;
+
+            const correlatedQueryWords = [...queryWords];
+
+            queryWords.forEach(word => {
+                if (QUANTUM_KEYWORDS[word]) {
+                    correlatedQueryWords.push(...getCorrelatedKeywords(word));
+                }
+            });
+
+            const matchedBlocks = blocks.filter(block => {
+                let blockHasMatch = false;
+                const blockWords = block.toLowerCase().split(/\s+/);
+
+                for (const word of correlatedQueryWords) {
+                    if (blockWords.includes(word) && !STOP_WORDS.includes(word)) {
+                        blockHasMatch = true;
+                        matchesFound = true;
+                    }
+                }
+                return blockHasMatch && !isCommonQuery;
+            });
+
+            if (!matchesFound) {
+                return [];
+            }
+
+            return matchedBlocks.map(block => {
+                if (hasMultipleMatches(queryWords, block.toLowerCase())) {
+                    return {
+                        block: block,
+                        isHighlyRelatable: true
+                    };
+                }
+                return {
+                    block: block,
+                    isHighlyRelatable: false
+                };
+            });
+        }
+
+        function askQuestion() {
+            const knowledgebase = document.getElementById("knowledgebase").value;
+            const question = document.getElementById("question").value;
+            const output = document.getElementById("output");
+
+            const blocks = splitKnowledgebase(knowledgebase);
+            const matchingBlocks = findMatchingBlocks(question, blocks);
+
+            output.innerHTML = "Direct Matches:<br><ul>" + matchingBlocks.map(item => {
+                if (item.isHighlyRelatable) {
+                    return `<li class="highlighted">${item.block}</li>`;
+                } else {
+                    return `<li>${item.block}</li>`;
+                }
+            }).join("") + "</ul>";
+        }
+    </script>
+</body>
+
+</html>

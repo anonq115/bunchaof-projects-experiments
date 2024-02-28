@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pseudo-elements Content Retrieval</title>
+    <style>
+        :root {
+            --after-content: "";
+        }
+
+        #target::before {
+            content: "Before Content";
+        }
+
+        #target::after {
+            content: var(--after-content);
+        }
+    </style>
+</head>
+<body>
+
+<div id="target">This is the target div. Type an expression below:</div>
+<input type="text" id="expressionInput" placeholder="Type an expression e.g., 8*8*8*8*12*23+43/4-233">
+<p>Content of ::before: <span id="beforeContent"></span></p>
+
+<script>
+    function getPseudoContent(element, pseudo) {
+        var styles = window.getComputedStyle(element, pseudo);
+        var content = styles.content;
+        return content.replace(/^["']|["']$/g, '');  
+    }
+
+    var targetElement = document.querySelector('#target');
+    var inputField = document.querySelector('#expressionInput');
+    var typingDelay;
+    var timeLeft = 1000; 
+    var countdownInterval;
+
+    function evaluateExpression(expression) {
+        try {
+            return new Function('return ' + expression)();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function evaluateInput() {
+        var inputValue = inputField.value;
+        var expressionToEvaluate = inputValue.includes('=') ? inputValue.split('=')[1].trim() : inputValue;
+        var result = evaluateExpression(expressionToEvaluate);
+        if (result !== null) {
+            inputField.value = inputValue + " = " + result;
+        }
+    }
+
+    inputField.addEventListener('input', function() {
+        var inputValue = this.value;
+        
+        var regexFirstNumberOnly = /^\d+$/;
+        var regexOperatorAtEnd = /[\+\-\*\/]$/;
+        var regexSecondNumber = /\d+\s*[\+\-\*\/]\s*\d+$/;
+        var regexAfterResult = /=\s*\d+\s*[\+\-\*\/]/;
+
+        if (regexOperatorAtEnd.test(inputValue) || regexFirstNumberOnly.test(inputValue)) {
+            clearTimeout(typingDelay);
+            clearInterval(countdownInterval);
+            return;
+        }
+
+        if (regexSecondNumber.test(inputValue) || regexAfterResult.test(inputValue)) {
+            clearTimeout(typingDelay);
+            clearInterval(countdownInterval); 
+
+            timeLeft = 1000; 
+            console.log("Timer restarted.");
+
+            countdownInterval = setInterval(function() {
+                timeLeft -= 100;
+                if (timeLeft > 0) {
+                    console.log("Time left:", timeLeft + "ms");
+                } else {
+                    clearInterval(countdownInterval);
+                }
+            }, 100);
+
+            typingDelay = setTimeout(evaluateInput, 1000);
+        }
+    });
+
+    inputField.addEventListener('keydown', function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            clearTimeout(typingDelay);
+            clearInterval(countdownInterval);
+            evaluateInput();
+        }
+    });
+
+    var beforeContent = getPseudoContent(targetElement, '::before');
+    document.querySelector('#beforeContent').textContent = beforeContent;
+
+</script>
+
+</body>
+</html>
